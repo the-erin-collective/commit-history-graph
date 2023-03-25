@@ -1,2 +1,36 @@
-*/local.settings.js
-*/package-lock.json
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+src/commit-history-graph/node_modules
+src/commit-history-graph/.pnp
+src/commit-history-graph/.pnp.js
+
+# testing
+src/commit-history-graph/coverage
+
+# next.js
+src/commit-history-graph/.next/
+src/commit-history-graph/out/
+
+# production
+src/commit-history-graph/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+src/commit-history-graph/npm-debug.log*
+src/commit-history-graph/yarn-debug.log*
+src/commit-history-graph/yarn-error.log*
+src/commit-history-graph/.pnpm-debug.log*
+
+# local env files
+src/commit-history-graph/.env*.local
+
+# typescript
+src/commit-history-graph/*.tsbuildinfo
+src/commit-history-graph/next-env.d.ts
+
+src/commit-history-graph/local.settings.js
+src/commit-history-graph/package-lock.json
