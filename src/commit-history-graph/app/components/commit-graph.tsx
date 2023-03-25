@@ -6,8 +6,6 @@ import fetchCommits from '../api/FetchApi';
 import styles from './commit-graph.module.css'
 
 let populate = async (commits: any) => {
-  console.log(commits);
-
   let weekCount = 54;
   const weeks = [];
 
@@ -31,11 +29,9 @@ let populate = async (commits: any) => {
 
 const CommitGraph = () => {
     const time = new Date();
-    const dateStamp = time.getUTCFullYear().toString().substring(2) + (time.getUTCMonth() < 10 ? '0' + time.getUTCMonth() : time.getUTCMonth()) + (time.getUTCDay() < 10 ? '0' + time.getUTCDay() : time.getUTCDay()); 
+    const dateStamp = time.getUTCFullYear().toString().substring(2) + (time.getUTCMonth() < 10 ? '0' + time.getUTCMonth() : time.getUTCMonth()) + (time.getUTCDay() < 10 ? '0' + time.getUTCDay() : time.getUTCDay()) + ( time.getHours() < 10 ? '0' +  time.getHours() :  time.getHours())  + ( time.getMinutes() < 10 ? '0' +  time.getMinutes() :  time.getMinutes())  ; 
 
-    const { isLoading, isFetching, error, data, status } = useQuery(process.env.nameLookup + dateStamp, fetchCommits);
-    
-
+    const { isLoading, isFetching, error, data, status } = useQuery(dateStamp, fetchCommits);
     const [graph, setGraph] = useState(<></>);
 
     useEffect(() => {

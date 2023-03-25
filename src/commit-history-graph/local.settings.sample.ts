@@ -1,9 +1,10 @@
-const env = {
+declare const config: {
     isOrg : false,
-    nameLookup: 'your-user-name',
+    nameLookup: ['your-user-name'],
+    emailLookup: ['your-email=here'],
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret',
     accessToken: 'your-personal-access-token'
 };
 
-module.exports = env;
+export default config;

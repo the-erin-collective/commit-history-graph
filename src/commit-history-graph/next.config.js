@@ -2,25 +2,36 @@
 const path = require('path');
 const fs = require('fs');
 
-const sampleSettingsPath = './local.settings.sample.js';
-const settingsPath = './local.settings.js';
+const sampleSettingsPath = './.env.local.sample';
+const settingsPath = './env.local';
 
 const getLocalSettings = async () => {
+  let localSettings = {};
+
   try 
   {
-    const localSettings = require(settingsPath);
+    const localSettingsFile = await fs.promises.readFile(settingsPath);
+    const variables = localSettingsFile.toString().split('\n');
+
+    variables.forEach(variable => {    
+      localSettings[variable.split('='[0])] = variable.split('='[1]);
+    });
 
     return localSettings;
   } 
   catch (ex) 
   {
-    if (!fs.existsSync(sampleSettingssettingsPathPath)) 
+    if (!fs.existsSync(settingsPath)) 
     {
       const data = await fs.promises.readFile(sampleSettingsPath);
-      const localSettings = data.toString();
+      const localSettingsFile = data.toString();
   
-      await fs.promises.writeFile(settingsPath, localSettings); 
-      
+      await fs.promises.writeFile(settingsPath, localSettingsFile); 
+
+      variables.forEach(variable => {    
+        localSettings[variable.split('='[0])] = variable.split('='[1]);
+      });
+
       return localSettings;
     }
   }
@@ -47,7 +58,7 @@ module.exports = async function() {
             test: /\.css$/,
             use: ['style-loader', 'css-loader', 'postcss-loader']
           }
-        );
+        );       
         return config;
     },
   }

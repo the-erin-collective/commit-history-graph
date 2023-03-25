@@ -12,9 +12,11 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.content}>
         <div className={styles.graph}>
-          <QueryClientProvider client={queryClient}>
-            <CommitGraph />
-          </QueryClientProvider> 
+          <Suspense fallback={<></>}>
+            <QueryClientProvider client={queryClient}>
+              <CommitGraph />
+            </QueryClientProvider> 
+          </Suspense>
         </div>
       </div>
     </main>

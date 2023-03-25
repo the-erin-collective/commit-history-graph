@@ -23,6 +23,6 @@
       "@app/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "local.settings.js", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "local.config.d.ts", "local.settings.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "local.settings.sample.ts"]
 }
