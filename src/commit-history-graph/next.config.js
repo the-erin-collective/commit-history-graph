@@ -2,21 +2,27 @@
 const path = require('path');
 const fs = require('fs');
 
+const sampleSettingsPath = './local.settings.sample.js';
+const settingsPath = './local.settings.js';
+
 const getLocalSettings = async () => {
   try 
   {
-    const localSettings = require('./local.settings');
+    const localSettings = require(settingsPath);
 
     return localSettings;
   } 
   catch (ex) 
   {
-    const data = await fs.promises.readFile('./local.settings.sample.js');
-    const localSettings = data.toString();
-
-    await fs.promises.writeFile("./local.settings.js", localSettings); 
-    
-    return localSettings;
+    if (!fs.existsSync(sampleSettingssettingsPathPath)) 
+    {
+      const data = await fs.promises.readFile(sampleSettingsPath);
+      const localSettings = data.toString();
+  
+      await fs.promises.writeFile(settingsPath, localSettings); 
+      
+      return localSettings;
+    }
   }
 }
 
