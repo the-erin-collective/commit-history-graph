@@ -3,12 +3,6 @@ import axios from "axios";
 import { Octokit } from "@octokit/core";
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 
-// async function fetchCommits() {
-//     const { data } = await axios.get('https://jsonplaceholder.typicode.com/users')
-//     return data
-// }
-    
-
 async function fetchCommits(){
   const isOrg = process.env.isOrg;
 
@@ -22,7 +16,7 @@ async function fetchCommits(){
     type: "oauth-app"
   });
   
-  const octokit = new Octokit({ auth: appAuthentication });
+  const octokit = new Octokit({ auth: process.env.accessToken });
   
   const nameLookup = process.env.nameLookup;
   
