@@ -1,16 +1,12 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
+const localSettings = require('./local.settings');
 
 const nextConfig = {
   experimental: {
     appDir: true,
   },
-  env : {
-    isOrg : false,
-    nameLookup: 'your-user-name',
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret'
-  },
+  env: localSettings,
   compress: false,
   productionBrowserSourceMaps: true,
   swcMinify: false,
