@@ -61,26 +61,6 @@ const CommitGraph = () => {
         {graph}
       </>
     );
-
-    // if (isLoading || isFetching) {
-    //     return <div>Loading...</div>
-    // }
-    
-    // if (error) {
-    //     return <div>Error! {error.toString()}</div>
-    // }
-    
-    // let graph = await populate(data)
-
-    // return (
-    //   <>
-    //   {graph}
-    //   </>
-    // )
-}
-    
-// const CommitGraph = dynamic(() => Promise.resolve(GraphContent()).then((content) => () => content), {
-//   ssr: false, // tell Next.js not to render and hydrate the component on the server-side
-// });
+};
 
 export default CommitGraph;
