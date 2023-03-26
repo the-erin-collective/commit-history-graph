@@ -1,4 +1,5 @@
-export interface ResponseEventCommit { 
+export interface ResponseEventCommit {
+    url: string; 
     author: { 
         email: string 
     }; 

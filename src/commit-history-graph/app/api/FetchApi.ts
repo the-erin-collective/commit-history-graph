@@ -22,7 +22,7 @@ let octokit: any = null;
 
 async function fetchCommits()
 {
-  let flattenedCommits: Array<Commit> = [];
+  let commits: Array<Commit> = [];
 
   const url = "";
 
@@ -34,19 +34,21 @@ async function fetchCommits()
   }
   else
   {
-    flattenedCommits = await requestUserEventCommits();
+    commits = await requestUserEventCommits();
 
     const repos = await requestRepos();
 
     const repoCommits = await requestRepoCommits(repos);
 
-    flattenedCommits.push(...repoCommits);
+    commits.push(...repoCommits);
   }
 
   let weeklyCommits: any = [];
   const weekCount = 54;
   const now = new Date();
   let dayOffset = now.getDay();
+
+  // today need to make sure the dates match up with the weekday of the commit
 
   for (let week = 1; week <= weekCount; week++) 
   {
@@ -58,7 +60,8 @@ async function fetchCommits()
           dailyCommits.push({
             dayOfWeek: day,
             weekNumber: week,
-            commits: 0
+            commits: 0,
+            repos: 0
           });
           continue;
         }
@@ -66,13 +69,33 @@ async function fetchCommits()
         const daysBehind = ((week - 1) * 7) + (day - 1) - dayOffset;
         const dateBehind = new Date(new Date().setDate(now.getDate() - daysBehind));
 
-        let todaysCommitCount = 0;
+        let repos: Array<string> = [];
+
+        const todaysCommitCount = commits.filter(commit => {
+            const commitDate = new Date(commit.date);
+
+            const sameDay = commitDate.getDate() === dateBehind.getDate() &&
+              commitDate.getMonth() === dateBehind.getMonth() &&
+              commitDate.getFullYear() === dateBehind.getFullYear();
+
+            if(sameDay && !repos.includes(commit.repo))
+            {
+              repos.push(commit.repo);
+            }
+
+            return (
+              sameDay
+            );
+          })
+          .map(commit => 1)
+          .reduce((total, num) => total + num, 0);
 
         dailyCommits.push({
           dayOfWeek: day,
           weekNumber: week,
           dateOfCommit: dateBehind,
-          commits: todaysCommitCount
+          commits: todaysCommitCount,
+          repos: repos.length
         });
     }
 
@@ -97,7 +120,8 @@ async function doAuth()
   octokit = new Octokit({ auth: _accessToken });
 }
 
-async function requestUserEventCommits() {
+async function requestUserEventCommits() 
+{
   if (octokit == null) 
   {
     await doAuth();
@@ -139,10 +163,25 @@ async function requestUserEventCommits() {
                   login = commit.actor.login;
                 }
 
+                const regex = /https:\/\/api\.github\.com\/repos\/(.+?)\/(.+?)\/commits\/.+/;
+                const match = commit.url.match(regex);
+
+                let repoName = '';
+
+                if (match == null || match.length < 3) 
+                {
+                  repoName = 'unknown/repo';
+                }
+                else
+                {
+                  repoName = match[1] + "/" + match[2];
+                }
+
                 const newCommit: Commit = {
                   date: event.created_at,
                   email: commit.author.email,
                   login: login,
+                  repo: repoName
                 };
 
                 if (_emailLookupList.includes(newCommit.email) || _nameLookupList.includes(newCommit.login)) 
@@ -187,7 +226,8 @@ async function requestRepos()
   return reposResponse.data;
 }
 
-async function requestRepoCommits(repos: any) {
+async function requestRepoCommits(repos: any) 
+{
   if (octokit == null) 
   {
     await doAuth();
@@ -243,7 +283,8 @@ async function requestRepoCommits(repos: any) {
       const newCommit: Commit = {
         date: commitInfo.commit.author.date,
         email: commitInfo.commit.author.email,
-        login: login
+        login: login,
+        repo: owner + "/" + repoName
       };
 
       if (_emailLookupList.includes(newCommit.email) || _nameLookupList.includes(newCommit.login)) 
