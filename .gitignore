@@ -36,3 +36,4 @@ src/commit-history-graph/local.settings.js
 src/commit-history-graph/package-lock.json
 src/commit-history-graph/local.settings.ts
 src/commit-history-graph/local.settings.sample.js
+src/commit-history-graph/local.settings.json

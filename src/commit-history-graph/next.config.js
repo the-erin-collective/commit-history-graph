@@ -2,44 +2,36 @@
 const path = require('path');
 const fs = require('fs');
 
-const sampleSettingsPath = './.env.local.sample';
-const settingsPath = './env.local';
+const sampleSettingsPath = './local.settings.sample.json';
+const settingsPath = './local.settings.json';
 
 const getLocalSettings = async () => {
-  let localSettings = {};
-
   try 
   {
-    const localSettingsFile = await fs.promises.readFile(settingsPath);
-    const variables = localSettingsFile.toString().split('\n');
+    const localSettingsFile = await fs.promises.readFile(settingsPath, 'utf-8');
+  
+    const config = JSON.parse(localSettingsFile);
 
-    variables.forEach(variable => {    
-      localSettings[variable.split('='[0])] = variable.split('='[1]);
-    });
-
-    return localSettings;
+    return config;
   } 
   catch (ex) 
   {
     if (!fs.existsSync(settingsPath)) 
     {
-      const data = await fs.promises.readFile(sampleSettingsPath);
-      const localSettingsFile = data.toString();
-  
+      const localSettingsFile = await fs.promises.readFile(sampleSettingsPath, 'utf-8');
+
       await fs.promises.writeFile(settingsPath, localSettingsFile); 
 
-      variables.forEach(variable => {    
-        localSettings[variable.split('='[0])] = variable.split('='[1]);
-      });
+      const config = JSON.parse(localSettingsFile);
 
-      return localSettings;
+      return config;
     }
   }
 }
 
 module.exports = async function() {
   const localSettings = await getLocalSettings();
-  
+
   const nextConfig = {
     experimental: {
       appDir: true,
