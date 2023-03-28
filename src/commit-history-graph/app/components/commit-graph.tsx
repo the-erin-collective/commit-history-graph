@@ -12,10 +12,13 @@ let populate = async (commits: any) => {
   for (let week = 1; week <= weekCount; week++) 
   {
     const days = [];
+
     for (let day = 1; day <= 7; day++) 
     {
-      days.push(<div className={styles.day + " " + styles.weekday +  "-" + week.toString() + " " + styles.day + "-" + day.toString()}></div>);
+      const thisClassName = styles.day + " " + styles.weekday +  "-" + week.toString() + " " + styles.day + "-" + day.toString();
+      days.push(<div className={thisClassName}></div>);
     }
+
     weeks.push(<div className={styles.week}>{days}</div>);
   } 
 
@@ -36,7 +39,10 @@ const CommitGraph = () => {
 
     useEffect(() => {
       const populateGraph = async () => {
-        if (data) {
+        if (data) 
+        {
+          console.log(data);
+
           const graphData = await populate(data);
           setGraph(graphData);
         }
@@ -44,11 +50,13 @@ const CommitGraph = () => {
       populateGraph();
     }, [data]);
   
-    if (isLoading || isFetching) {
+    if (isLoading || isFetching) 
+    {
       return <div className={styles.loading}>Loading...</div>
     }
     
-    if (error) {
+    if (error) 
+    {
       return <div className={styles.error}>Error! {error.toString()}</div>
     }
   
