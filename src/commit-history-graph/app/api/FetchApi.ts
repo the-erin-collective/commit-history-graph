@@ -54,8 +54,6 @@ async function fetchCommits()
 
   for (let week = 0; week < weekCount; week++) 
   {
-    console.log('week: ', week);
-
     const dailyCommits = [];
     for (let day = 6; day >= 0; day--) 
     {
