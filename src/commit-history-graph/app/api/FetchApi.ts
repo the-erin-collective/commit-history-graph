@@ -17,6 +17,7 @@ const _accessToken: string = config.accessToken;
 const _userEventEndpoint: string = "GET /users/:username/events";
 const _userReposEndpoints : string = "GET /user/repos";
 const _repoCommitsEndpoint: string = "GET /repos/:owner/:repo/commits";
+const _startOnSunday: boolean = true;
 
 let octokit: any = null;
 
@@ -46,63 +47,85 @@ async function fetchCommits()
   let weeklyCommits: any = [];
   const weekCount = 54;
   const now = new Date();
+  let mondayOffset = (_startOnSunday ? 2 : 1)
   let dayOffset = now.getDay();
 
   // today need to make sure the dates match up with the weekday of the commit
 
-  for (let week = 1; week <= weekCount; week++) 
+  for (let week = 0; week < weekCount; week++) 
   {
+    console.log('week: ', week);
+
     const dailyCommits = [];
-    for (let day = 1; day <= 7; day++) 
+    for (let day = 6; day >= 0; day--) 
     {
-        if(week == 1 && day <= dayOffset)
+      // if today is sunday, offset = 0, if today is monday, offset = 1, if today is tuesday, offset = 2
+      const daysBehind = ((week - 1) * 7) + (day - 1);
+
+      const dateBehind = new Date(new Date().setDate(now.getDate() - daysBehind - dayOffset - mondayOffset));
+
+      if(isFuture(now, dateBehind))
+      {
+        dailyCommits.push({
+        dateOfCommit: dateBehind,
+        dayOfWeek: day,
+        weekNumber: week,
+        commits: -1,
+        repos: 0
+        });
+        continue;
+      }
+
+      let repos: Array<string> = [];
+
+      const todaysCommitCount = commits.filter(commit => {
+        const commitDate = new Date(commit.date);
+
+        const sameDay = commitDate.getDate() === dateBehind.getDate() &&
+            commitDate.getMonth() === dateBehind.getMonth() &&
+            commitDate.getFullYear() === dateBehind.getFullYear();
+
+        if(sameDay && !repos.includes(commit.repo))
         {
-          dailyCommits.push({
-            dayOfWeek: day,
-            weekNumber: week,
-            commits: 0,
-            repos: 0
-          });
-          continue;
+          repos.push(commit.repo);
         }
 
-        const daysBehind = ((week - 1) * 7) + (day - 1) - dayOffset;
-        const dateBehind = new Date(new Date().setDate(now.getDate() - daysBehind));
+        return (
+          sameDay
+        );
+      })
+      .map(commit => 1)
+      .reduce((total, num) => total + num, 0);
 
-        let repos: Array<string> = [];
-
-        const todaysCommitCount = commits.filter(commit => {
-            const commitDate = new Date(commit.date);
-
-            const sameDay = commitDate.getDate() === dateBehind.getDate() &&
-              commitDate.getMonth() === dateBehind.getMonth() &&
-              commitDate.getFullYear() === dateBehind.getFullYear();
-
-            if(sameDay && !repos.includes(commit.repo))
-            {
-              repos.push(commit.repo);
-            }
-
-            return (
-              sameDay
-            );
-          })
-          .map(commit => 1)
-          .reduce((total, num) => total + num, 0);
-
-        dailyCommits.push({
-          dayOfWeek: day,
-          weekNumber: week,
-          dateOfCommit: dateBehind,
-          commits: todaysCommitCount,
-          repos: repos.length
-        });
+      dailyCommits.push({
+        dayOfWeek: day,
+        weekNumber: week,
+        dateOfCommit: dateBehind,
+        commits: todaysCommitCount,
+        repos: repos.length
+      });
     }
 
     weeklyCommits.push(dailyCommits);
   } 
 
   return weeklyCommits;
+}
+
+function isFuture(nowDate: Date, testDate: Date)
+{
+  // is today
+  if(testDate.getFullYear() == nowDate.getFullYear() && testDate.getMonth() == nowDate.getDate() && testDate.getDate() == testDate.getDate())
+  {
+    return false;
+  }
+
+  if(testDate > nowDate)
+  {
+    return true;
+  }
+
+  return false;
 }
 
 async function doAuth()
