@@ -4,5 +4,56 @@
     "emailLookup": ["your-email-here"],
     "clientId": "your-client-id",
     "clientSecret": "your-client-secret",
-    "accessToken": "your-personal-access-token"
+    "accessToken": "your-personal-access-token",
+    "startOnSunday" : true,
+    "colors": [
+        {
+            "minValue" : 0,
+            "maxValue" : 0,
+            "level" : 0,
+            "hex" : "868686"
+        },
+        {
+            "minValue" : 1,
+            "maxValue" : 4,
+            "level" : 1,
+            "hex" : "9697A9"
+        },
+        {
+            "minValue" : 5,
+            "maxValue" : 9,
+            "level" : 2,
+            "hex" : "8CA2C6"
+        },
+        {
+            "minValue" : 10,
+            "maxValue" : 14,
+            "level" : 3,
+            "hex" : "7DB176"
+        },
+        {
+            "minValue" : 15,
+            "maxValue" : 19,
+            "level" : 4,
+            "hex" : "ADEE73"
+        },
+        {
+            "minValue" : 20,
+            "maxValue" : 14,
+            "level" : 5,
+            "hex" : "FAF383"
+        },
+        {
+            "minValue" : 25,
+            "maxValue" : 29,
+            "level" : 6,
+            "hex" : "F7A16B"
+        },
+        {
+            "minValue" : 30,
+            "maxValue" : null,
+            "level" : 7,
+            "hex" : "FF6C6C"
+        }
+    ]
 }

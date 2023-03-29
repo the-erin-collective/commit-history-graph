@@ -2,10 +2,11 @@
 import axios from "axios";
 import { Octokit } from "@octokit/core";
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
-import { EnvironmentConfig } from '../../local.config';
+import { ColorConfig, EnvironmentConfig } from '../../local.config';
 import CacheService from '../services/CacheService';
 import { Commit } from "@app/commit";
 import { ResponseEvent, ResponseEventCommit } from "@app/responseEvent";
+import { DailyCommit, WeeklyCommits } from "@app/weeklycommits";
 const config: EnvironmentConfig = require('../../local.settings.json');
 
 const _nameLookupList: Array<string> = config.nameLookup;
@@ -17,11 +18,18 @@ const _accessToken: string = config.accessToken;
 const _userEventEndpoint: string = "GET /users/:username/events";
 const _userReposEndpoints : string = "GET /user/repos";
 const _repoCommitsEndpoint: string = "GET /repos/:owner/:repo/commits";
-const _startOnSunday: boolean = true;
+const _startOnSunday: boolean = config.startOnSunday;
 
 let octokit: any = null;
 
-async function fetchCommits()
+function fetchLegend()
+{
+  let colorLegend: ColorConfig[] = config.colors;
+
+  return colorLegend;
+}
+
+async function fetchCommits(): Promise<WeeklyCommits[]>
 {
   let commits: Array<Commit> = [];
 
@@ -44,17 +52,20 @@ async function fetchCommits()
     commits.push(...repoCommits);
   }
 
-  let weeklyCommits: any = [];
+  let weeklyCommits: WeeklyCommits[] = [];
   const weekCount = 54;
   const now = new Date();
-  let mondayOffset = (_startOnSunday ? 2 : 1)
+  let mondayOffset = (_startOnSunday ? 1 : 0);
   let dayOffset = now.getDay();
 
   // today need to make sure the dates match up with the weekday of the commit
 
   for (let week = 0; week < weekCount; week++) 
   {
-    const dailyCommits = [];
+    let thisWeek: WeeklyCommits = {
+      DailyCommits: []
+    };
+
     for (let day = 6; day >= 0; day--) 
     {
       // if today is sunday, offset = 0, if today is monday, offset = 1, if today is tuesday, offset = 2
@@ -64,7 +75,7 @@ async function fetchCommits()
 
       if(isFuture(now, dateBehind))
       {
-        dailyCommits.push({
+        thisWeek.DailyCommits.push({
         dateOfCommit: dateBehind,
         dayOfWeek: day,
         weekNumber: week,
@@ -95,7 +106,7 @@ async function fetchCommits()
       .map(commit => 1)
       .reduce((total, num) => total + num, 0);
 
-      dailyCommits.push({
+      thisWeek.DailyCommits.push({
         dayOfWeek: day,
         weekNumber: week,
         dateOfCommit: dateBehind,
@@ -104,7 +115,7 @@ async function fetchCommits()
       });
     }
 
-    weeklyCommits.push(dailyCommits);
+    weeklyCommits.push(thisWeek);
   } 
 
   return weeklyCommits;
@@ -223,7 +234,7 @@ async function requestUserEventCommits()
   return commits;
 }
 
-async function requestRepos()
+async function requestRepos(): Promise<Array<string>>
 {
   if(octokit == null)
   {
@@ -247,7 +258,7 @@ async function requestRepos()
   return reposResponse.data;
 }
 
-async function requestRepoCommits(repos: any) 
+async function requestRepoCommits(repos: any): Promise<Commit[]>
 {
   if (octokit == null) 
   {
@@ -317,9 +328,12 @@ async function requestRepoCommits(repos: any)
     return commits;
   });
 
-  const commits = (await Promise.all(commitsList)).flat();
+  const commits: Commit[] = (await Promise.all(commitsList)).flat();
 
   return commits;
 }
 
-export default fetchCommits;
+export default {
+  fetchCommits: fetchCommits,
+  fetchLegend: fetchLegend
+}
