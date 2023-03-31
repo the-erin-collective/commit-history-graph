@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query'
-import fetchApi from '../api/FetchApi';
+import configService from '../api/configService';
+import queryApi from '../api/queryApi';
 import styles from './commit-graph.module.css'
 import { Commit } from '@app/commit';
 import { DailyCommit, WeeklyCommits } from '@app/weeklycommits';
@@ -52,7 +53,7 @@ const getDayLevelClass = async (commitInfo: DailyCommit): Promise<string> => {
     return levelPrefix + noDataClassName;
   }
 
-  let legend = await fetchApi.fetchLegend().sort((a, b) => a.level - b.level);
+  let legend = await configService.fetchLegend().sort((a, b) => a.level - b.level);
 
   let className = levelPrefix;
 
@@ -84,7 +85,7 @@ const CommitGraph = (): JSX.Element => {
     const time = new Date();
     const dateStamp = time.getUTCFullYear().toString().substring(2) + (time.getUTCMonth() < 10 ? '0' + time.getUTCMonth() : time.getUTCMonth()) + (time.getUTCDay() < 10 ? '0' + time.getUTCDay() : time.getUTCDay()) + ( time.getHours() < 10 ? '0' +  time.getHours() :  time.getHours())  + ( time.getMinutes() < 10 ? '0' +  time.getMinutes() :  time.getMinutes())  ; 
 
-    const { isLoading, isFetching, error, data, status } = useQuery(dateStamp, fetchApi.fetchCommits);
+    const { isLoading, isFetching, error, data, status } = useQuery(dateStamp, queryApi.fetchCommits);
     const [graph, setGraph] = useState(<></>);
 
     useEffect(() => {

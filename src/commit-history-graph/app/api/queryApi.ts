@@ -5,6 +5,7 @@ import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 import { ColorConfig, EnvironmentConfig } from '../../local.config';
 import CacheService from '../services/CacheService';
 import { Commit } from "@app/commit";
+import UserContributionsResponse from '@app/userContributionsResponse'
 import { ResponseEvent, ResponseEventCommit } from "@app/responseEvent";
 import { DailyCommit, WeeklyCommits } from "@app/weeklycommits";
 import { QueryVariables } from "@app/queryVariables";
@@ -20,8 +21,8 @@ const _userContributionsRequestHeaders = {
 
 const _apiEndpoint = 'https://api.github.com/graphql';
 
-const _userContributionsQuery: string = `query { 
-  user(login: $username) {
+const _userContributionsQuery: string = `query($identifier: String!, $startDate: DateTime!, $endDate: DateTime!) { 
+  user(login: $identifier) {
     email
     createdAt
     contributionsCollection(from: $startDate, to: $endDate) {
@@ -41,10 +42,19 @@ const _userContributionsQuery: string = `query {
 }`;
 
 const _now = new Date();
-const _endDate = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate(), 23, 59, 59, 999); 
-const _startDate = new Date(_now.getFullYear() - 1, _now.getMonth(), _now.getDate(), 0, 0, 0, 0); 
+const daysUntilWeekEnds = 6 - _now.getDay() + (config.startOnSunday ? 0 : 1);
+const dayThisWeekEnds = new Date(new Date().setDate(_now.getDate() + daysUntilWeekEnds));
+const _endDate = new Date(dayThisWeekEnds.getFullYear(), dayThisWeekEnds.getMonth(), dayThisWeekEnds.getDate(), 23, 59, 59, 999); 
+const previousYear = new Date((_endDate.getFullYear() - 1), _endDate.getMonth(), _endDate.getDate(), 0, 0, 0, 0); 
+const _startDate = addDays(previousYear, 1);
 
 let octokit: any = null;
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
 
 async function fetchCommits(): Promise<WeeklyCommits[]>
 {
@@ -94,7 +104,7 @@ async function fetchCommits(): Promise<WeeklyCommits[]>
 
       const dateBehind = new Date(new Date().setDate(_now.getDate() - daysBehind - dayOffset - mondayOffset));
 
-      if(isFuture(now, dateBehind))
+      if(isFuture(_now, dateBehind))
       {
         thisWeek.DailyCommits.push({
         dateOfCommit: dateBehind,
@@ -187,10 +197,10 @@ async function fetchData(headers: { 'Content-Type': string; Authorization: strin
   }, {
     headers: headers,
   })
-  .then((response) => {
+  .then((response: UserContributionsResponse) => {
     console.log(response.data);
 
-    results = response.data;
+    results = response.data.toString();
   })
   .catch((error) => {
     console.error('Error:', error.message);
