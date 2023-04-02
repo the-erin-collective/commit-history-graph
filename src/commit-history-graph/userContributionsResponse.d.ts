@@ -27,7 +27,7 @@ interface UserContributionsResponse {
     weekday: number;
     date: string;
     contributionCount: number;
-    color: string;
+    contributionLevel: string;
   }
 
 export default UserContributionsResponse;

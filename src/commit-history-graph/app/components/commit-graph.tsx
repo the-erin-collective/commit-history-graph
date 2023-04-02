@@ -5,12 +5,11 @@ import { useQuery } from 'react-query'
 import configService from '../api/configService';
 import queryApi from '../api/queryApi';
 import styles from './commit-graph.module.css'
-import { Commit } from '@app/commit';
 import { DailyCommit, WeeklyCommits } from '@app/weeklycommits';
 import { DayData } from '@app/day-data';
 
 let populate = async (commits: WeeklyCommits[]): Promise<JSX.Element> => {
-  let weekCount = 54;
+  let weekCount = 53;
   const weeks = [];
   
   for (let week = weekCount; week > 0; week--) 
@@ -26,7 +25,6 @@ let populate = async (commits: WeeklyCommits[]): Promise<JSX.Element> => {
     
       const dayData: DayData = ({
         commits: thisCommitInfo.commits,
-        repos: thisCommitInfo.repos,
         date: thisCommitInfo.dateOfCommit
       });
 

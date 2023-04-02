@@ -1,10 +1,11 @@
 let cachedResponses: Array<any> = [];
 
-const getCachedResponse = async (route: string) => {
+const getCachedResponse = async (identifier: string) => {
   let responseContents = null;
 
   cachedResponses.forEach((response) => {
-    if(response.route == route){
+    if(response.identifier == identifier)
+    {
       responseContents = response.responseContents;
     }
   });
@@ -12,11 +13,17 @@ const getCachedResponse = async (route: string) => {
   return responseContents;
 }
 
-const saveCachedResponse = async (route: string, responseContents: string) => {
+const saveCachedResponse = async (identifier: string, responseContents: string) => {
   let update = false;
+
+  if(responseContents == null || responseContents.length == 0)
+  {
+    return;
+  }
   
   cachedResponses.forEach((response) => {
-    if(response.route == route){
+    if(response.identifier == identifier)
+    {
       response.fileContents = responseContents;
       update = true;
     }
@@ -24,7 +31,7 @@ const saveCachedResponse = async (route: string, responseContents: string) => {
 
   if(!update){
     cachedResponses.push({
-      route: route,
+      identifier: identifier,
       responseContents: responseContents 
     });
   }

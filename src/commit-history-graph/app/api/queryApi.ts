@@ -1,14 +1,11 @@
 
 import axios from "axios";
-import { Octokit } from "@octokit/core";
-import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 import { ColorConfig, EnvironmentConfig } from '../../local.config';
-import CacheService from '../services/CacheService';
-import { Commit } from "@app/commit";
+import CacheService from './../services/CacheService';
 import UserContributionsResponse from '@app/userContributionsResponse'
-import { ResponseEvent, ResponseEventCommit } from "@app/responseEvent";
 import { DailyCommit, WeeklyCommits } from "@app/weeklycommits";
 import { QueryVariables } from "@app/queryVariables";
+
 import ConfigService from './configService';
 
 const config: EnvironmentConfig = ConfigService.fetchConfig();
@@ -41,11 +38,20 @@ const _userContributionsQuery: string = `query($identifier: String!, $startDate:
   }
 }`;
 
-const _now = new Date();
+const _now = new Date(Date.UTC(
+  new Date().getUTCFullYear(),
+  new Date().getUTCMonth(),
+  new Date().getUTCDate(),
+  new Date().getUTCHours(),
+  new Date().getUTCMinutes(),
+  new Date().getUTCSeconds(),
+  new Date().getUTCMilliseconds()
+));
+
 const daysUntilWeekEnds = 6 - _now.getDay() + (config.startOnSunday ? 0 : 1);
-const dayThisWeekEnds = new Date(new Date().setDate(_now.getDate() + daysUntilWeekEnds));
-const _endDate = new Date(dayThisWeekEnds.getFullYear(), dayThisWeekEnds.getMonth(), dayThisWeekEnds.getDate(), 23, 59, 59, 999); 
-const previousYear = new Date((_endDate.getFullYear() - 1), _endDate.getMonth(), _endDate.getDate(), 0, 0, 0, 0); 
+const dayThisWeekEnds = new Date(new Date().setDate(_now.getDate() + (daysUntilWeekEnds == 7 ? 0 : daysUntilWeekEnds)));
+const _endDate = new Date(Date.UTC(dayThisWeekEnds.getFullYear(), dayThisWeekEnds.getMonth(), dayThisWeekEnds.getDate(), 23, 59, 59, 999));
+const previousYear = new Date(Date.UTC(_endDate.getFullYear() - 1, _endDate.getMonth(), _endDate.getDate(), 0, 0, 0, 0));
 const _startDate = addDays(previousYear, 1);
 
 let octokit: any = null;
@@ -58,9 +64,7 @@ function addDays(date: Date, days: number): Date {
 
 async function fetchCommits(): Promise<WeeklyCommits[]>
 {
-  let commits: Array<Commit> = [];
-
-
+  let commits: Array<DailyCommit> = [];
 
   if(config.isOrg)
   {
@@ -69,27 +73,39 @@ async function fetchCommits(): Promise<WeeklyCommits[]>
  //  });
   }
   else
-  {
-   
-    
+  {  
     let results =  await requestUserContributions();
 
-  //  commits = await requestUserEventCommits();
-
-//    const repos = await requestRepos();
-
- //   const repoCommits = await requestRepoCommits(repos);
-
- //   commits.push(...repoCommits);
+    results.forEach(result => {
+      result.data.user.contributionsCollection.contributionCalendar.weeks.forEach(week => {
+        week.contributionDays.forEach(contributionDay => {
+          const contributionDate_UTC = new Date(contributionDay.date);
+          const contributionDate = new Date(Date.UTC(
+            contributionDate_UTC.getUTCFullYear(),
+            contributionDate_UTC.getUTCMonth(),
+            contributionDate_UTC.getUTCDate(),
+            contributionDate_UTC.getUTCHours(),
+            contributionDate_UTC.getUTCMinutes(),
+            contributionDate_UTC.getUTCSeconds(),
+            contributionDate_UTC.getUTCMilliseconds()
+          ));
+          
+          commits.push({
+            commits: contributionDay.contributionCount,
+            dateOfCommit: contributionDate,
+            dayOfWeek: 0,
+            weekNumber: 0
+          });
+        })
+      })
+    });
   }
 
   let weeklyCommits: WeeklyCommits[] = [];
-  const weekCount = 54;
+  const weekCount = 53;
 
-  let mondayOffset = (config.startOnSunday ? 1 : 0);
+  let mondayOffset = (config.startOnSunday ? -5 : 1);
   let dayOffset = _now.getDay();
-
-  // today need to make sure the dates match up with the weekday of the commit
 
   for (let week = 0; week < weekCount; week++) 
   {
@@ -100,49 +116,35 @@ async function fetchCommits(): Promise<WeeklyCommits[]>
     for (let day = 6; day >= 0; day--) 
     {
       // if today is sunday, offset = 0, if today is monday, offset = 1, if today is tuesday, offset = 2
-      const daysBehind = ((week - 1) * 7) + (day - 1);
+      const daysBehind = ((week) * 7) + (day - 1);
 
-      const dateBehind = new Date(new Date().setDate(_now.getDate() - daysBehind - dayOffset - mondayOffset));
+      const dateBehind_UTC = new Date(new Date().setDate(_now.getDate() - daysBehind - dayOffset - mondayOffset));
+      const dateBehind = new Date(Date.UTC(dateBehind_UTC.getUTCFullYear(), dateBehind_UTC.getUTCMonth(), dateBehind_UTC.getUTCDate(), new Date().getUTCHours(), dateBehind_UTC.getUTCMinutes(), dateBehind_UTC.getUTCSeconds(), dateBehind_UTC.getUTCMilliseconds()));
 
-      if(isFuture(_now, dateBehind))
+      if(isFuture(_now, dateBehind) || isBefore(_startDate, dateBehind))
       {
         thisWeek.DailyCommits.push({
         dateOfCommit: dateBehind,
         dayOfWeek: day,
         weekNumber: week,
-        commits: -1,
-        repos: 0
+        commits: -1
         });
         continue;
       }
+      
+      const todaysCommitCount = commits
+        .filter(commit => {
+          const commitDate = new Date(Date.UTC(commit.dateOfCommit.getUTCFullYear(), commit.dateOfCommit.getUTCMonth(), commit.dateOfCommit.getUTCDate()));
 
-      let repos: Array<string> = [];
-
-      const todaysCommitCount = commits.filter(commit => {
-        const commitDate = new Date(commit.date);
-
-        const sameDay = commitDate.getDate() === dateBehind.getDate() &&
-            commitDate.getMonth() === dateBehind.getMonth() &&
-            commitDate.getFullYear() === dateBehind.getFullYear();
-
-        if(sameDay && !repos.includes(commit.repo))
-        {
-          repos.push(commit.repo);
-        }
-
-        return (
-          sameDay
-        );
-      })
-      .map(commit => 1)
-      .reduce((total, num) => total + num, 0);
+          return isSameDay(commitDate, dateBehind);
+        })
+        .reduce((total, commit) => total + commit.commits, 0);
 
       thisWeek.DailyCommits.push({
         dayOfWeek: day,
         weekNumber: week,
         dateOfCommit: dateBehind,
         commits: todaysCommitCount,
-        repos: repos.length
       });
     }
 
@@ -152,10 +154,25 @@ async function fetchCommits(): Promise<WeeklyCommits[]>
   return weeklyCommits;
 }
 
+
+function isBefore(beforeDate: Date, testDate: Date)
+{
+  if(isSameDay(beforeDate, testDate))
+  {
+    return false;
+  }
+
+  if(beforeDate > testDate)
+  {
+    return true;
+  }
+
+  return false;
+}
+
 function isFuture(nowDate: Date, testDate: Date)
 {
-  // is today
-  if(testDate.getFullYear() == nowDate.getFullYear() && testDate.getMonth() == nowDate.getDate() && testDate.getDate() == testDate.getDate())
+  if(isSameDay(nowDate, testDate))
   {
     return false;
   }
@@ -168,7 +185,16 @@ function isFuture(nowDate: Date, testDate: Date)
   return false;
 }
 
-async function requestUserContributions() 
+function isSameDay(firstDate: Date, testDate: Date)
+{
+  const sameDay = firstDate.getUTCDate() === testDate.getUTCDate() &&
+    firstDate.getUTCMonth() === testDate.getUTCMonth() &&
+    firstDate.getUTCFullYear() === testDate.getUTCFullYear();
+
+  return sameDay;
+}
+
+async function requestUserContributions(): Promise<UserContributionsResponse[]>
 {
   let _userContributionsVariables: QueryVariables[] = [];
 
@@ -180,31 +206,54 @@ async function requestUserContributions()
     });
   });
 
-  const dataResults = await Promise.all(_userContributionsVariables.map(variables => fetchData(_userContributionsRequestHeaders, _userContributionsQuery, variables)));
+  const dataResults = await Promise.all(
+      _userContributionsVariables.map(async (variables) => {
+        const result = await fetchData(
+          _userContributionsRequestHeaders,
+          variables.identifier,
+          _userContributionsQuery,
+          variables
+        );
 
-  const combinedData = dataResults.flat();
+        return result;
+      })
+    );
+
+  const combinedData: UserContributionsResponse[] = dataResults.flat().map(result => {
+      if(result.length == 0)
+      {
+        return null;
+      }
+        return JSON.parse(result)
+      }
+    );
 
   return combinedData;
 }
 
-async function fetchData(headers: { 'Content-Type': string; Authorization: string; }, query: string, variables: QueryVariables): Promise<string>
+async function fetchData(headers: { 'Content-Type': string; Authorization: string; }, queryIdentifier: string, query: string, variables: QueryVariables): Promise<string>
 {
   let results = "";
    
-  axios.post(_apiEndpoint, {
+  let response = await CacheService.GetResponse('userContributions-' + queryIdentifier);
+
+  if(response != null)
+    return response;
+
+  await axios.post(_apiEndpoint, {
     query: query,
     variables: variables,
   }, {
     headers: headers,
   })
-  .then((response: UserContributionsResponse) => {
-    console.log(response.data);
-
-    results = response.data.toString();
+  .then((response) => {
+    results = JSON.stringify(response.data);
   })
   .catch((error) => {
     console.error('Error:', error.message);
   });
+
+  await CacheService.SaveResponse('userContributions-' + queryIdentifier, results);
 
   return results;
 }
