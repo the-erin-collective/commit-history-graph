@@ -1,6 +1,6 @@
 {
   "name": "commit-history-graph",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "commit history graph",
   "main": "dist/index.js",
   "scripts": {
