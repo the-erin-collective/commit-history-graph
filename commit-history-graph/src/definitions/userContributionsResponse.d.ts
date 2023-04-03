@@ -1,4 +1,4 @@
-interface UserContributionsResponse {
+export interface UserContributionsResponse {
     data: {
       user: User;
     };
@@ -29,5 +29,3 @@ interface UserContributionsResponse {
     contributionCount: number;
     contributionLevel: string;
   }
-
-export default UserContributionsResponse;

@@ -9,4 +9,5 @@ export interface DailyCommit
     dayOfWeek: number;
     weekNumber: number;
     commits: number;
+    color: ColorConfig;
 }

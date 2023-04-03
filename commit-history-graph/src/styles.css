@@ -1,0 +1,112 @@
+.commit-history-graph{
+    position: absolute;
+    height: 200px;
+    width: 60%;
+    left: 50%;
+    top: 10%;
+    margin-left: -32%;
+}
+
+.commit-history-graph .container{
+    position: relative;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    height: inherit;
+  }
+  
+  .commit-history-graph .content{
+    position: absolute;
+    left: 1.commit-history-graph .4%;
+    top: 1.commit-history-graph .4%;
+    width: 98%;
+    height: 90%;
+  }
+  
+  .commit-history-graph .graph{
+    position: absolute;
+    left: 2%;
+    top: 0;
+    width: 98%;
+    height: 90%;
+  }
+  
+  
+  .commit-history-graph .container div[class^="week-"] {
+    color:red;
+  }
+  
+  .commit-history-graph .container div[class^="day-"] {
+    color:blue;
+  }
+  
+  .commit-history-graph .weekday{
+    float: left;
+  }
+  
+  .commit-history-graph .week{
+    width: 1.8%;
+    height: 100%;
+    float: left;
+    margin-left: 0.05%;
+  }
+  
+  .commit-history-graph .day{
+    float: left;
+    width: 73%;
+    height: 9%;
+    margin-top: 44%;
+    position: relative;
+    border-radius: 31%;
+    margin-left: 15%;
+  }
+  
+  .commit-history-graph .loading{
+    background: none;
+  }
+  
+  .commit-history-graph .error{
+    background: #fe8989c9;
+  }
+  
+  .commit-history-graph .graphDay{
+    opacity: 0.9;
+  }
+  
+  .commit-history-graph .level_null{
+    background: none;
+  }
+  
+  .commit-history-graph .level_0{
+    background: #868686;
+  }
+  
+  .commit-history-graph .level_1{
+    background: #9697A9;
+  }
+  
+  .commit-history-graph .level_2{
+    background: #8CA2C6;
+  }
+  
+  .commit-history-graph .level_3{
+    background: #7DB176;
+  }
+  
+  .commit-history-graph .level_4{
+    background: #ADEE73;
+  }
+  
+  .commit-history-graph .level_5{
+    background: #FAF383;
+  }
+  
+  .commit-history-graph .level_6{
+    background: #F7A16B;
+  }
+  
+  .commit-history-graph .level_7{
+    background: #FF6C6C;
+  }

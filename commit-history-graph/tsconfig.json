@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "outDir": "dist",
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*", "src/styles.d.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts", "src/services", "src/definitions.ts", "**/*.css"]
+}
