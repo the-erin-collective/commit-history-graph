@@ -1,5 +1,5 @@
 {
-  "name": "commit-history-graph",
+  "name": "commit-history-graph-react",
   "version": "0.1.0",
   "private": true,
   "scripts": {
