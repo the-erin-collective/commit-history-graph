@@ -50,6 +50,11 @@ function addDays(date: Date, days: number): Date {
 
 async function fetchCommits(options: Options): Promise<WeeklyCommits[]>
 {
+  if(options.colors == null)
+  {
+    console.log('need color config');
+    return [];
+  }
   const daysUntilWeekEnds = 6 - _now.getDay() + (options.startOnSunday ? 0 : 1);
   const dayThisWeekEnds = new Date(new Date().setDate(_now.getDate() + (daysUntilWeekEnds == 7 ? 0 : daysUntilWeekEnds)));
   const endDate = new Date(Date.UTC(dayThisWeekEnds.getFullYear(), dayThisWeekEnds.getMonth(), dayThisWeekEnds.getDate(), 23, 59, 59, 999));
@@ -145,7 +150,6 @@ async function fetchCommits(options: Options): Promise<WeeklyCommits[]>
 
 function getColor(legend: ColorConfig[], contributions: number): ColorConfig
 {
-  
   for(let colorIndex = 0; colorIndex < legend.length; colorIndex++)
   {
     let lowPass = (legend[colorIndex].minValue <= contributions);
