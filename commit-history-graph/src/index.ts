@@ -3,7 +3,7 @@ import queryApi from './services/queryApi';
 import graphBuilder from './services/graphBuilder';
 const styles = require('./styles.css');
 
-export async function loadGraph(selector: string, legend: ColorConfig[] | null): Promise<void> {
+export async function loadGraph(selector: string, options: Options): Promise<void> {
     const targetDiv = document.querySelector(selector);
 
     if (!targetDiv) {
@@ -11,34 +11,28 @@ export async function loadGraph(selector: string, legend: ColorConfig[] | null):
         return;
     }
 
-    const pac = process.env.chg_pac;
+    const pac = options.accessToken;
     if (!pac) {
-        console.error('Required environment variable chg_pac is not set.');
+        console.error('Required option accessToken is not set.');
         return;
     }
 
-    const login = process.env.chg_login;
+    const login = options.login;
     if (!login) {
-        console.error('Required environment variable chg_login is not set.');
+        console.error('Required option login is not set.');
         return;
     }
 
-    const startOnSunday = process.env.chg_startOnSunday;
-    if (!startOnSunday || (startOnSunday !== 'true' && startOnSunday !== 'false')) {
-        console.error('Required environment variable chg_startOnSunday is not set.');
-        return;
-    }
-
-    if(legend == null)
+    if(options.colors == null)
     {
-        legend = _fallbackLegend;
+        options.colors = _fallbackLegend;
     }
 
     const fetchOptions: Options = {
         accessToken: pac,
         login: login,
-        startOnSunday: (startOnSunday === 'true'),
-        colors: legend
+        startOnSunday: options.startOnSunday,
+        colors: options.colors
     };
 
     let loading = '<div class="commit-history-graph">Loading...</div>';
