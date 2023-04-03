@@ -1,9 +1,8 @@
 {
   "name": "commit-history-graph",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "commit history graph",
   "main": "dist/index.js",
-  "types": "dist/graph.d.ts",
   "scripts": {
     "build": "webpack",
     "postbuild": "ts-node ./src/definitions.ts",
