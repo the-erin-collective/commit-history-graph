@@ -63,10 +63,9 @@ async function fetchCommits(options: Options): Promise<WeeklyCommits[]>
 
   let commits: Array<DailyCommit> = [];
 
-    let results =  await requestUserContributions(startDate, endDate, options.accessToken, options.login, options.startOnSunday);
+    let result =  await requestUserContributions(startDate, endDate, options.accessToken, options.login, options.startOnSunday);
 
-    results.forEach(result => {
-      result.data.user.contributionsCollection.contributionCalendar.weeks.forEach(week => {
+    result.data.user.contributionsCollection.contributionCalendar.weeks.forEach(week => {
         week.contributionDays.forEach(contributionDay => {
           const contributionDate_UTC = new Date(contributionDay.date);
           const contributionDate = new Date(Date.UTC(
@@ -87,8 +86,7 @@ async function fetchCommits(options: Options): Promise<WeeklyCommits[]>
             color: _nullColor
           });
         })
-      })
-    });
+      });
   
 
   let weeklyCommits: WeeklyCommits[] = [];
@@ -206,7 +204,7 @@ function isSameDay(firstDate: Date, testDate: Date)
   return sameDay;
 }
 
-async function requestUserContributions(startDate: Date, endDate: Date, accessToken: string, login: string, startOnSunday: boolean): Promise<UserContributionsResponse[]>
+async function requestUserContributions(startDate: Date, endDate: Date, accessToken: string, login: string, startOnSunday: boolean): Promise<UserContributionsResponse>
 {
   let userContributionsVariables: QueryVariables = {
     identifier: login,
