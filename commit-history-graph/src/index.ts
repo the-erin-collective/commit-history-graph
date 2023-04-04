@@ -35,7 +35,7 @@ export async function loadGraph(selector: string, options: Options): Promise<voi
         colors: options.colors
     };
 
-    let loading = '<div class="commit-history-graph">Loading...</div>';
+    let loading = '<div class="commit-history-graph">loading commit history...</div>';
     
     targetDiv.innerHTML = loading;
 
