@@ -8,7 +8,7 @@ export interface Options
   login: string;
   accessToken: string;
   startOnSunday: boolean;
-  colors: ColorConfig[];
+  colors: ColorConfig[] | null;
 }
 
 export interface ColorConfig 
