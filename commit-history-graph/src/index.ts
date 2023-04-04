@@ -43,7 +43,7 @@ export async function loadGraph(selector: string, options: Options): Promise<voi
 
     let graphHtml: string = graphBuilder.BuildGraph(commitData);
 
-    let content = '<div class="commit-history-graph">' + graphHtml + '</div><style>' + styles + '</style>';
+    let content = '<div class="commit-history-graph">' + graphHtml + '</div><style>' + JSON.stringify(styles) + '</style>';
     
     targetDiv.innerHTML = content;
 }

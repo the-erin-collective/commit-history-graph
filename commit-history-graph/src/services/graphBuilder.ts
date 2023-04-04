@@ -27,12 +27,12 @@ const buildGraph = (weeklyData: WeeklyCommits[]): string => {
       days.push('<div class="' + thisClassName + '" data-tag="' + JSON.stringify(dayData) + '"></div>');
     }
 
-    weeks.push('<div class="week">' + days.join() + '</div>');
+    weeks.push('<div class="week">' + days.join('') + '</div>');
   } 
 
   graphHtlm = '<div class="content">';
   graphHtlm += '<div class="graph">';
-  graphHtlm += weeks.join();
+  graphHtlm += weeks.join('');
   graphHtlm += '</div>';
   graphHtlm += '</div>';
 
